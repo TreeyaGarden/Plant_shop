@@ -10,22 +10,47 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 1100px; margin: 20px auto; padding: 20px; background: #f4f6f9; color: #333; }
+        /* ดีไซน์พื้นหลังหน้าจอหลัก สามารถใส่รูปภาพพื้นหลังเต็มจอได้ที่นี่ */
+
+        body { 
+
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+
+            max-width: 1150px; 
+
+            margin: 20px auto; 
+
+            padding: 20px; 
+
+            background-color: #f4f6f9; 
+
+            /* หากต้องการให้หน้าจอหลักมีภาพพื้นหลังภาพใหญ่ ให้ใส่ลิงก์แทนสีด้านล่างได้ครับ */
+
+            background-image: var(--global-page-bg, none);
+
+            background-size: cover;
+
+            background-attachment: fixed;
+
+            color: #333; 
+
+        }
+
 
         h2, h3, h4 { color: #2c3e50; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
 
         
-
-        /* ตั้งค่าเริ่มต้นให้ซ่อนแอปหลักไว้ก่อน และแสดงหน้า Login ชัดเจน */
 
         #authContainer { max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: block; }
 
         #appContainer { display: none; }
 
 
-        .user-bar { display: flex; justify-content: space-between; align-items: center; background: #2c3e50; color: white; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; }
+        .user-bar { display: flex; justify-content: space-between; align-items: center; background: #2c3e50; color: white; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
 
         .tab-menu { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #cbd5e1; padding-bottom: 0; flex-wrap: wrap; }
 
@@ -41,15 +66,74 @@
         .tab-content.active { display: block; }
 
 
-        .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        /* การ์ดฟอร์มข้อมูล: พื้นหลังขาวทึบ 100% (อ่านง่ายสบายตา) มีลายน้ำเงารูปต้นไม้จางๆ มุมขวาล่าง */
 
-        .form-group { margin-bottom: 12px; }
+        .card { 
 
-        label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px; }
+            background: #ffffff !important; /* บังคับขาวทึบ ตัวหนังสือชัดเจนแน่นอน */
 
-        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+            padding: 25px; 
 
-        button { background: #3498db; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-size: 14px; }
+            margin-bottom: 20px; 
+
+            border-radius: 8px; 
+
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07); 
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+        .card::before {
+
+            content: "";
+
+            position: absolute;
+
+            right: -10px;
+
+            bottom: -10px;
+
+            width: 200px;
+
+            height: 200px;
+
+            /* ลายน้ำเงารูปต้นไม้โปร่งแสง (ความจาง 6%) อยู่หลังการ์ดขาว ไม่กวนการกรอกข้อมูล */
+
+            background-image: var(--tab-watermark-image, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2327ae60'%3E%3Cpath d='M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11 2,11C2,11 4,7 9,6C14,5 17,8 17,8Z'/%3E%3C/svg%3E"));
+
+            background-repeat: no-repeat;
+
+            background-position: bottom right;
+
+            background-size: contain;
+
+            opacity: 0.06; 
+
+            pointer-events: none;
+
+            z-index: 0;
+
+        }
+
+        .card > * { position: relative; z-index: 1; }
+
+
+        .form-group { margin-bottom: 15px; }
+
+        label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; color: #34495e; }
+
+        
+
+        input, select, textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: left; background: #fff; }
+
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
+
+        
+
+        button { background: #3498db; color: white; border: none; padding: 10px 18px; cursor: pointer; border-radius: 6px; font-size: 14px; font-weight: bold; transition: 0.2s; }
 
         button:hover { background: #2980b9; }
 
@@ -70,13 +154,24 @@
         .btn-danger:hover { background: #c0392b; }
 
 
+        .action-btns { display: flex !important; gap: 4px !important; justify-content: center !important; align-items: center !important; flex-wrap: wrap; }
+
+        .btn-action-edit { background: #f39c12 !important; color: white !important; border: none !important; padding: 5px 8px !important; border-radius: 4px !important; font-size: 11px !important; font-weight: bold !important; cursor: pointer !important; }
+
+        .btn-action-del { background: #e74c3c !important; color: white !important; border: none !important; padding: 5px 8px !important; border-radius: 4px !important; font-size: 11px !important; font-weight: bold !important; cursor: pointer !important; }
+
+        .btn-action-log { background: #00cec9 !important; color: white !important; border: none !important; padding: 5px 8px !important; border-radius: 4px !important; font-size: 11px !important; font-weight: bold !important; cursor: pointer !important; }
+
+        .btn-action-qr { background: #34495e !important; color: white !important; border: none !important; padding: 5px 8px !important; border-radius: 4px !important; font-size: 11px !important; font-weight: bold !important; cursor: pointer !important; }
+
+
         table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; font-size: 14px; }
 
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: middle; }
+        th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; vertical-align: middle; }
 
-        th { background: #f8f9fa; }
+        th { background: #f8fafc; color: #1e293b; font-weight: 600; }
 
-        .badge { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 12px; font-size: 12px; display: inline-block; margin: 2px; }
+        .badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 12px; font-size: 12px; display: inline-block; margin: 2px; font-weight: 500; }
 
         .button-row { display: flex; gap: 10px; margin-top: 15px; }
 
@@ -92,20 +187,46 @@
         .search-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 15px; }
 
 
-        .version-badge { background: #e67e22; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; font-weight: normal; }
+        .plant-thumb { width: 55px; height: 55px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; cursor: pointer; transition: 0.2s; }
+
+        .plant-thumb:hover { opacity: 0.8; }
+
+        .preview-img { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; margin-top: 8px; display: none; }
+
+        
+
+        .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+
+        .album-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center; padding-bottom: 10px; }
+
+        .album-card img { width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid #eee; }
+
+        .album-card-body { padding: 10px; }
+
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border: 1px solid #888; width: 90%; max-width: 800px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+        .close-modal { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+
+        .close-modal:hover { color: black; }
+
+
+        .version-badge { background: #27ae60; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; font-weight: normal; }
 
     </style>
 
 </head>
 
-<body>
+<body lang="th">
 
 
     <!-- 🔐 หน้าจอ Login / Register -->
 
     <div id="authContainer">
 
-        <h2 id="authTitle" style="text-align: center; color: #2c3e50; margin-top: 0;">🔐 เข้าสู่ระบบจัดการสวน <span style="font-size: 12px; color: #e67e22;">(Ver.1.1)</span></h2>
+        <h2 id="authTitle" style="text-align: center; color: #2c3e50; margin-top: 0;">🔐 เข้าสู่ระบบจัดการสวน <span class="version-badge">Ver. 1.36</span></h2>
 
         <form id="authForm" onsubmit="handleAuth(event)">
 
@@ -144,7 +265,7 @@
 
         <div class="user-bar">
 
-            <div>🌵 <strong>ระบบจัดการสวนต้นไม้</strong> <span class="version-badge">Ver.1.1</span> (<span id="userEmailDisplay">กำลังโหลด...</span>)</div>
+            <div>🌵 <strong>ระบบจัดการสวนต้นไม้</strong> <span class="version-badge">Ver. 1.36</span> (<span id="userEmailDisplay">กำลังโหลด...</span>)</div>
 
             <button type="button" onclick="logout()" class="btn-danger" style="padding: 6px 12px; font-size: 13px; cursor: pointer;">🚪 ออกจากระบบ</button>
 
@@ -167,9 +288,11 @@
 
             <button class="tab-btn" onclick="switchTab(event, 'tab-search')">🔍 ค้นหาขั้นสูง</button>
 
+            <button class="tab-btn" onclick="switchTab(event, 'tab-album')">🖼️ อัลบั้มรูปภาพ</button>
+
             <button class="tab-btn" onclick="switchTab(event, 'tab-view-plants')">📋 รายการทั้งหมด</button>
 
-            <button class="tab-btn" onclick="switchTab(event, 'tab-backup')">💾 สำรองข้อมูล</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-bg-settings')" style="background: #27ae60; color: white;">🎨 ตั้งค่าภาพลายน้ำ</button>
 
         </div>
 
@@ -178,7 +301,7 @@
 
         <div id="tab-origins" class="tab-content active">
 
-            <div class="card">
+            <div class="card" id="card-origins">
 
                 <h3>🌍 จัดการคลังข้อมูลถิ่นกำเนิดและสภาพแวดล้อม</h3>
 
@@ -235,7 +358,7 @@
 
                             <th>ลักษณะถิ่นที่อยู่</th>
 
-                            <th style="width: 140px; text-align: center;">จัดการ</th>
+                            <th style="width: 150px; text-align: center;">จัดการ</th>
 
                         </tr>
 
@@ -258,11 +381,13 @@
 
         <div id="tab-species" class="tab-content">
 
-            <div class="card">
+            <div class="card" id="card-species">
 
-                <h3>🌿 1.1 จัดการสายพันธุ์หลัก (เชื่อมโยงถิ่นกำเนิดอัตโนมัติ)</h3>
+                <h3>🌿 1.1 จัดการสายพันธุ์หลัก</h3>
 
                 <form id="speciesForm" onsubmit="saveSpeciesRecord(event)">
+
+                    <input type="hidden" id="species_id_hidden">
 
                     <div class="form-group">
 
@@ -296,7 +421,13 @@
 
                     </div>
 
-                    <button type="submit" class="btn-purple">➕ เพิ่มสายพันธุ์หลัก</button>
+                    <div class="button-row">
+
+                        <button type="submit" id="btnSaveSpecies" class="btn-purple">➕ เพิ่มสายพันธุ์หลัก</button>
+
+                        <button type="button" id="btnCancelSpeciesEdit" class="btn-danger" style="display:none; background:#7f8c8d;" onclick="cancelSpeciesEdit()">❌ ยกเลิก</button>
+
+                    </div>
 
                 </form>
 
@@ -317,7 +448,7 @@
 
                             <th>ถิ่นที่อยู่</th>
 
-                            <th style="width: 80px; text-align: center;">จัดการ</th>
+                            <th style="width: 150px; text-align: center;">จัดการ</th>
 
                         </tr>
 
@@ -340,6 +471,8 @@
 
                 <form id="subSpeciesForm" onsubmit="saveSubSpeciesRecord(event)">
 
+                    <input type="hidden" id="sub_species_id_hidden">
+
                     <div class="form-group">
 
                         <label>เลือกสายพันธุ์หลัก:</label>
@@ -360,7 +493,13 @@
 
                     </div>
 
-                    <button type="submit" class="btn-purple">➕ เพิ่มสายพันธุ์ย่อย</button>
+                    <div class="button-row">
+
+                        <button type="submit" id="btnSaveSubSpecies" class="btn-purple">➕ เพิ่มสายพันธุ์ย่อย</button>
+
+                        <button type="button" id="btnCancelSubSpeciesEdit" class="btn-danger" style="display:none; background:#7f8c8d;" onclick="cancelSubSpeciesEdit()">❌ ยกเลิก</button>
+
+                    </div>
 
                 </form>
 
@@ -377,7 +516,7 @@
 
                             <th>สายพันธุ์ย่อย / ชื่อเฉพาะ</th>
 
-                            <th style="width: 80px; text-align: center;">จัดการ</th>
+                            <th style="width: 150px; text-align: center;">จัดการ</th>
 
                         </tr>
 
@@ -400,11 +539,13 @@
 
         <div id="tab-cross" class="tab-content">
 
-            <div class="card">
+            <div class="card" id="card-cross">
 
-                <h3>🧬 บันทึกประวัติคู่ผสมพันธุ์</h3>
+                <h3 id="crossFormTitle">🧬 บันทึกประวัติคู่ผสมพันธุ์</h3>
 
                 <form id="crossForm" onsubmit="saveCrossRecord(event)">
+
+                    <input type="hidden" id="cross_id_hidden">
 
                     <div class="parent-container">
 
@@ -472,13 +613,27 @@
 
                     <div class="form-group">
 
-                        <label>วันที่ผสม:</label>
+                        <label>วันที่ผสม (วัน/เดือน/ปี):</label>
 
-                        <input type="date" id="cross_date">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+
+                            <input type="text" id="cross_date_display" placeholder="วว/ดด/ปปปป (เช่น 31/12/2026)" style="flex: 1;" onchange="syncThaiDateInput('cross_date_display', 'cross_date')">
+
+                            <input type="date" id="cross_date" style="position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px;" onchange="syncDateObjectToDisplay('cross_date', 'cross_date_display')">
+
+                            <button type="button" class="btn-warning" onclick="triggerDatePicker('cross_date')" style="white-space: nowrap; padding: 10px 15px;">📅 เลือกจากปฏิทิน</button>
+
+                        </div>
 
                     </div>
 
-                    <button type="submit" class="btn-purple">💾 บันทึกคู่ผสม</button>
+                    <div class="button-row">
+
+                        <button type="submit" id="btnSaveCross" class="btn-purple">💾 บันทึกคู่ผสม</button>
+
+                        <button type="button" id="btnCancelCrossEdit" class="btn-danger" style="display:none; background:#7f8c8d;" onclick="cancelCrossEdit()">❌ ยกเลิก</button>
+
+                    </div>
 
                 </form>
 
@@ -497,9 +652,9 @@
 
                             <th>พ่อพันธุ์</th>
 
-                            <th>วันที่ผสม</th>
+                            <th>วันที่ผสม (วัน/เดือน/ปี)</th>
 
-                            <th style="width: 80px; text-align: center;">จัดการ</th>
+                            <th style="width: 150px; text-align: center;">จัดการ</th>
 
                         </tr>
 
@@ -522,11 +677,13 @@
 
         <div id="tab-add-plant" class="tab-content">
 
-            <div class="card">
+            <div class="card" id="card-add-plant">
 
-                <h3>🌱 เพิ่มข้อมูลต้นไม้</h3>
+                <h3 id="plantFormTitle">🌱 เพิ่มข้อมูลต้นไม้</h3>
 
                 <form id="plantForm" onsubmit="savePlantRecord(event)">
+
+                    <input type="hidden" id="plant_id_hidden">
 
                     <div class="form-group">
 
@@ -580,6 +737,27 @@
 
                     </div>
 
+                    
+
+                    <div class="form-group">
+
+                        <label>🖼️ รูปภาพต้นไม้หลัก:</label>
+
+                        <div style="display: flex; gap: 10px; align-items: center;">
+
+                            <input type="url" id="image_url" placeholder="https://example.com/image.jpg" style="flex: 1;" oninput="previewImage('image_url', 'main_img_preview')">
+
+                            <input type="file" id="localImageFile" accept="image/*" style="display: none;" onchange="handleLocalImageSelect(event, 'image_url', 'main_img_preview')">
+
+                            <button type="button" class="btn-warning" onclick="document.getElementById('localImageFile').click()" style="white-space: nowrap; padding: 10px 15px;">📁 เลือกรูปจากเครื่อง</button>
+
+                        </div>
+
+                        <img id="main_img_preview" class="preview-img" alt="พรีวิวรูป">
+
+                    </div>
+
+
                     <div class="form-group">
 
                         <label>สถานะ:</label>
@@ -602,9 +780,17 @@
 
                     <div class="form-group">
 
-                        <label>วันที่เพาะ / วันเกิด:</label>
+                        <label>วันที่เพาะ / วันเกิด (วัน/เดือน/ปี):</label>
 
-                        <input type="date" id="birth_date" onchange="calculateInputAge()">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+
+                            <input type="text" id="birth_date_display" placeholder="วว/ดด/ปปปป (เช่น 31/12/2025)" style="flex: 1;" onchange="syncThaiDateInput('birth_date_display', 'birth_date'); calculateInputAge();">
+
+                            <input type="date" id="birth_date" style="position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px;" onchange="syncDateObjectToDisplay('birth_date', 'birth_date_display'); calculateInputAge();">
+
+                            <button type="button" class="btn-warning" onclick="triggerDatePicker('birth_date')" style="white-space: nowrap; padding: 10px 15px;">📅 เลือกจากปฏิทิน</button>
+
+                        </div>
 
                     </div>
 
@@ -624,7 +810,13 @@
 
                     </div>
 
-                    <button type="submit" class="btn-success">💾 บันทึกข้อมูลต้นไม้</button>
+                    <div class="button-row">
+
+                        <button type="submit" id="btnSavePlant" class="btn-success">💾 บันทึกข้อมูลต้นไม้</button>
+
+                        <button type="button" id="btnCancelPlantEdit" class="btn-danger" style="display:none; background:#7f8c8d;" onclick="cancelPlantEdit()">❌ ยกเลิก</button>
+
+                    </div>
 
                 </form>
 
@@ -643,9 +835,13 @@
 
                         <tr>
 
+                            <th style="width: 60px;">รูป</th>
+
                             <th>รหัสต้นไม้</th>
 
                             <th>สายพันธุ์</th>
+
+                            <th>สายพันธุ์ย่อย</th>
 
                             <th>ลักษณะเด่น</th>
 
@@ -653,7 +849,9 @@
 
                             <th>อายุ</th>
 
-                            <th style="width: 80px; text-align: center;">จัดการ</th>
+                            <th>วันเพาะ/เกิด</th>
+
+                            <th style="width: 230px; text-align: center;">จัดการ / ประวัติ / QR</th>
 
                         </tr>
 
@@ -661,7 +859,7 @@
 
                     <tbody id="managePlantTableBody">
 
-                        <tr><td colspan="6" style="text-align:center;">กำลังโหลด...</td></tr>
+                        <tr><td colspan="9" style="text-align:center;">กำลังโหลด...</td></tr>
 
                     </tbody>
 
@@ -676,7 +874,7 @@
 
         <div id="tab-sales" class="tab-content">
 
-            <div class="card">
+            <div class="card" id="card-sales">
 
                 <h3>🏷️ จัดการขนาด ราคา และเตรียมเสนอขาย</h3>
 
@@ -688,6 +886,8 @@
 
                         <tr>
 
+                            <th style="width: 60px;">รูป</th>
+
                             <th>รหัส</th>
 
                             <th>สายพันธุ์</th>
@@ -696,11 +896,11 @@
 
                             <th>สถานะ</th>
 
-                            <th style="width: 130px;">ขนาด</th>
+                            <th style="width: 200px;">ขนาด (ตัวเลข + หน่วย)</th>
 
                             <th style="width: 110px;">ราคา (฿)</th>
 
-                            <th style="width: 80px; text-align: center;">บันทึก</th>
+                            <th style="width: 150px; text-align: center;">จัดการ</th>
 
                         </tr>
 
@@ -708,7 +908,7 @@
 
                     <tbody id="salesTableBody">
 
-                        <tr><td colspan="7" style="text-align:center;">กำลังโหลด...</td></tr>
+                        <tr><td colspan="8" style="text-align:center;">กำลังโหลด...</td></tr>
 
                     </tbody>
 
@@ -723,7 +923,7 @@
 
         <div id="tab-record-sale" class="tab-content">
 
-            <div class="card">
+            <div class="card" id="card-record-sale">
 
                 <h3>💰 บันทึกประวัติการขาย (เลือกขายได้หลายต้น)</h3>
 
@@ -735,7 +935,21 @@
 
                         <div class="form-group" style="flex:1; min-width:220px;"><label>สถานที่ / ช่องทาง:</label><input type="text" id="sale_buyer_location" required></div>
 
-                        <div class="form-group" style="flex:1; min-width:180px;"><label>วันที่ขาย:</label><input type="date" id="sale_date_input" required></div>
+                        <div class="form-group" style="flex:1; min-width:220px;">
+
+                            <label>วันที่ขาย (วัน/เดือน/ปี):</label>
+
+                            <div style="display: flex; gap: 10px; align-items: center;">
+
+                                <input type="text" id="sale_date_display" placeholder="วว/ดด/ปปปป" style="flex: 1;" onchange="syncThaiDateInput('sale_date_display', 'sale_date_input')">
+
+                                <input type="date" id="sale_date_input" style="position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px;" onchange="syncDateObjectToDisplay('sale_date_input', 'sale_date_display')">
+
+                                <button type="button" class="btn-warning" onclick="triggerDatePicker('sale_date_input')" style="white-space: nowrap; padding: 10px 15px;">📅 เลือก</button>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -751,7 +965,7 @@
 
                             </thead>
 
-                            <tbody id="availablePlantsForSaleBody"><tr><td colspan="5" style="text-align:center;">กำลังโหลด...</td></tr></tbody>
+                            <tbody id="availablePlantsForSaleBody"><tr><td colspan="5" style="text-align:center;">ไม่มีต้นไม้พร้อมขาย</td></tr></tbody>
 
                         </table>
 
@@ -770,7 +984,7 @@
 
                     <thead>
 
-                        <tr><th>บิล</th><th>วันที่</th><th>ผู้ซื้อ</th><th>รายการ</th><th>ยอดรวม (฿)</th><th style="width:70px; text-align:center;">ลบ</th></tr>
+                        <tr><th>บิล</th><th>วันที่ขาย (วัน/เดือน/ปี)</th><th>ผู้ซื้อ</th><th>รายการ</th><th>ยอดรวม (฿)</th><th style="width: 150px; text-align: center;">จัดการ</th></tr>
 
                     </thead>
 
@@ -787,7 +1001,7 @@
 
         <div id="tab-search" class="tab-content">
 
-            <div class="card">
+            <div class="card" id="card-search">
 
                 <h3>🔍 ค้นหาข้อมูลต้นไม้ขั้นสูง</h3>
 
@@ -819,11 +1033,32 @@
 
                 <table>
 
-                    <thead><tr><th>รหัส</th><th>สายพันธุ์</th><th>ถิ่นกำเนิด</th><th>ลักษณะ</th><th>ราคา</th><th>สถานะ</th></tr></thead>
+                    <thead><tr><th style="width:60px;">รูป</th><th>รหัส</th><th>สายพันธุ์</th><th>สายพันธุ์ย่อย</th><th>ถิ่นกำเนิด</th><th>ลักษณะ</th><th>ขนาด</th><th>ราคา</th><th>สถานะ</th></tr></thead>
 
-                    <tbody id="advSearchTableBody"><tr><td colspan="6" style="text-align:center;">กรุณาค้นหา</td></tr></tbody>
+                    <tbody id="advSearchTableBody"><tr><td colspan="9" style="text-align:center;">กรุณาค้นหา</td></tr></tbody>
 
                 </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- หน้าจอ: อัลบั้มรูปภาพ -->
+
+        <div id="tab-album" class="tab-content">
+
+            <div class="card" id="card-album">
+
+                <h3>🖼️ อัลบั้มรูปภาพต้นไม้ทั้งหมดในสวน</h3>
+
+                <div class="form-group"><input type="text" id="searchAlbumInput" placeholder="🔍 ค้นหารูปในอัลบั้ม..." onkeyup="filterAlbumGrid()"></div>
+
+                <div id="albumGridContainer" class="album-grid">
+
+                    <div style="grid-column: 1/-1; text-align:center; padding: 20px;">กำลังโหลดอัลบั้ม...</div>
+
+                </div>
 
             </div>
 
@@ -834,7 +1069,7 @@
 
         <div id="tab-view-plants" class="tab-content">
 
-            <div class="card">
+            <div class="card" id="card-view-plants">
 
                 <h3>📋 รายการต้นไม้ทั้งหมดในสวน</h3>
 
@@ -844,11 +1079,11 @@
 
                     <thead>
 
-                        <tr><th>รหัส</th><th>สายพันธุ์</th><th>ถิ่นกำเนิด</th><th>คู่ผสม</th><th>ลักษณะ</th><th>ราคา</th><th>สถานะ</th><th>อายุ</th></tr>
+                        <tr><th style="width:60px;">รูป</th><th>รหัส</th><th>สายพันธุ์</th><th>สายพันธุ์ย่อย</th><th>ถิ่นกำเนิด</th><th>คู่ผสม</th><th>ลักษณะ</th><th>ขนาด</th><th>ราคา</th><th>สถานะ</th><th>อายุ</th><th>วันเกิด (วัน/เดือน/ปี)</th></tr>
 
                     </thead>
 
-                    <tbody id="plantTableBody"><tr><td colspan="8" style="text-align:center;">กำลังโหลด...</td></tr></tbody>
+                    <tbody id="plantTableBody"><tr><td colspan="12" style="text-align:center;">กำลังโหลด...</td></tr></tbody>
 
                 </table>
 
@@ -857,17 +1092,283 @@
         </div>
 
 
-        <!-- หน้าจอ: สำรองข้อมูล -->
+        <!-- หน้าจอ: 🎨 ตั้งค่าภาพลายน้ำ -->
 
-        <div id="tab-backup" class="tab-content">
+        <div id="tab-bg-settings" class="tab-content">
 
-            <div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+            <div class="card">
 
-                <h3>💾 สำรองและกู้คืนข้อมูล</h3>
+                <h3>🎨 กำหนดรูปลายน้ำพื้นหลัง (Watermark) แยกแต่ละหน้า</h3>
 
-                <p style="color: #666; font-size: 13px;">ระบบสำรองฐานข้อมูลหลัก (.json)</p>
+                <p style="color: #666; font-size: 13px; margin-bottom: 20px;">วางลิงก์รูปภาพ (URL) เพื่อให้แสดงเป็นเงาลายน้ำจางๆ ที่มุมขวาล่างของการ์ด โดยช่องกรอกข้อมูลและตารางด้านหน้าจะเป็นสีขาวทึบ 100% ทำให้มองเห็นตัวหนังสือชัดเจนและอ่านง่ายแน่นอนครับ</p>
+
+                
+
+                <div class="form-group">
+
+                    <label>🌍 คลังถิ่นกำเนิด:</label>
+
+                    <input type="url" id="bg_url_tab-origins" placeholder="https://..." oninput="updateTabWatermark('tab-origins')">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>🌿 จัดการสายพันธุ์:</label>
+
+                    <input type="url" id="bg_url_tab-species" placeholder="https://..." oninput="updateTabWatermark('tab-species')">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>🧬 บันทึกคู่ผสม:</label>
+
+                    <input type="url" id="bg_url_tab-cross" placeholder="https://..." oninput="updateTabWatermark('tab-cross')">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>🌱 เพิ่ม/จัดการต้นไม้:</label>
+
+                    <input type="url" id="bg_url_tab-add-plant" placeholder="https://..." oninput="updateTabWatermark('tab-add-plant')">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>🏷️ จัดการราคา:</label>
+
+                    <input type="url" id="bg_url_tab-sales" placeholder="https://..." oninput="updateTabWatermark('tab-sales')">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>💰 บันทึกการขาย:</label>
+
+                    <input type="url" id="bg_url_tab-record-sale" placeholder="https://..." oninput="updateTabWatermark('tab-record-sale')">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>🔍 ค้นหาขั้นสูง:</label>
+
+                    <input type="url" id="bg_url_tab-search" placeholder="https://..." oninput="updateTabWatermark('tab-search')">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>🖼️ อัลบั้มรูปภาพ:</label>
+
+                    <input type="url" id="bg_url_tab-album" placeholder="https://..." oninput="updateTabWatermark('tab-album')">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>📋 รายการทั้งหมด:</label>
+
+                    <input type="url" id="bg_url_tab-view-plants" placeholder="https://..." oninput="updateTabWatermark('tab-view-plants')">
+
+                </div>
 
             </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Modal: บันทึกประวัติพัฒนาการ (Growth Logs) -->
+
+    <div id="logModal" class="modal">
+
+        <div class="modal-content">
+
+            <span class="close-modal" onclick="closeLogModal()">&times;</span>
+
+            <h3 id="modalPlantTitle">📈 บันทึกพัฒนาการต้นไม้</h3>
+
+            
+
+            <form id="plantLogForm" onsubmit="savePlantLog(event)" style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+
+                <input type="hidden" id="log_id_hidden">
+
+                <input type="hidden" id="log_plant_id">
+
+                
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+
+                    <div class="form-group" style="flex: 2; min-width: 180px;">
+
+                        <label>ช่วงอายุ / หัวข้อบันทึก:</label>
+
+                        <input type="text" id="log_age_desc" placeholder="เช่น อายุ 1 เดือน, เปลี่ยนกระถาง" required>
+
+                    </div>
+
+                    <div class="form-group" style="flex: 2; min-width: 180px;">
+
+                        <label>วันที่บันทึก (วัน/เดือน/ปี):</label>
+
+                        <div style="display: flex; gap: 5px;">
+
+                            <input type="text" id="log_date_display" placeholder="วว/ดด/ปปปป" onchange="syncThaiDateInput('log_date_display', 'log_date'); calculateLogAgeFromPrevious();">
+
+                            <input type="date" id="log_date" style="position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px;" onchange="syncDateObjectToDisplay('log_date', 'log_date_display'); calculateLogAgeFromPrevious();">
+
+                            <button type="button" class="btn-warning" onclick="triggerDatePicker('log_date')" style="padding: 10px;">📅</button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>อายุไม้ ณ วันที่บันทึกนี้ (ปี / เดือน / วัน):</label>
+
+                    <div class="age-inputs">
+
+                        <div><input type="number" id="log_age_years" value="0" min="0"> <small>ปี</small></div>
+
+                        <div><input type="number" id="log_age_months" value="0" min="0" max="11"> <small>เดือน</small></div>
+
+                        <div><input type="number" id="log_age_days" value="0" min="0" max="30"> <small>วัน</small></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>ขนาดในช่วงเวลานี้:</label>
+
+                    <div style="display: flex; gap: 5px;">
+
+                        <input type="number" id="log_size_val" placeholder="ระบุตัวเลขขนาด" step="any" min="0" style="flex: 2;">
+
+                        <select id="log_size_unit" style="flex: 1; padding: 6px;">
+
+                            <option value="ซม.">ซม.</option>
+
+                            <option value="นิ้ว">นิ้ว</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>🖼️ รูปภาพช่วงเวลานี้:</label>
+
+                    <div style="display: flex; gap: 10px; align-items: center;">
+
+                        <input type="url" id="log_image_url" placeholder="https://example.com/growth.jpg" style="flex: 1;" oninput="previewImage('log_image_url', 'log_img_preview')">
+
+                        <input type="file" id="localLogImageFile" accept="image/*" style="display: none;" onchange="handleLocalImageSelect(event, 'log_image_url', 'log_img_preview')">
+
+                        <button type="button" class="btn-warning" onclick="document.getElementById('localLogImageFile').click()" style="white-space: nowrap; padding: 10px 15px;">📁 เลือกรูปจากเครื่อง</button>
+
+                    </div>
+
+                    <img id="log_img_preview" class="preview-img" alt="พรีวิวรูป">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>บันทึกเพิ่มเติม / รายละเอียด:</label>
+
+                    <textarea id="log_notes" rows="2" placeholder="เช่น แตกใบใหม่ 2 ใบ, รากเดินดีมาก"></textarea>
+
+                </div>
+
+
+                <div class="button-row">
+
+                    <button type="submit" id="btnSaveLog" class="btn-purple" style="flex: 1;">➕ เพิ่มบันทึกพัฒนาการ</button>
+
+                    <button type="button" id="btnCancelLogEdit" class="btn-danger" style="display:none; background:#7f8c8d;" onclick="cancelLogEdit()">❌ ยกเลิก</button>
+
+                </div>
+
+            </form>
+
+
+            <h4>📜 ประวัติพัฒนาการที่ผ่านมา (เรียงตามลำดับ)</h4>
+
+            <div style="max-height: 250px; overflow-y: auto;">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th style="width: 50px;">รูป</th>
+
+                            <th>วันที่</th>
+
+                            <th>ช่วงอายุ/หัวข้อ</th>
+
+                            <th>อายุตอนบันทึก</th>
+
+                            <th>ขนาด</th>
+
+                            <th>บันทึก</th>
+
+                            <th style="width: 90px; text-align: center;">จัดการ</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="modalLogTableBody">
+
+                        <tr><td colspan="7" style="text-align:center;">กำลังโหลด...</td></tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Modal: แสดง QR Code ของต้นไม้ -->
+
+    <div id="qrModal" class="modal">
+
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+
+            <span class="close-modal" onclick="closeQrModal()">&times;</span>
+
+            <h3 id="qrModalTitle">🔲 QR Code ต้นไม้</h3>
+
+            <p style="color: #666; font-size: 13px;">สแกนเพื่อดูประวัติและพัฒนาการทั้งหมด</p>
+
+            <div id="qrcode" style="display: inline-block; padding: 15px; background: white; border: 1px solid #ddd; border-radius: 8px; margin: 15px 0;"></div>
+
+            <div id="qrPlantInfo" style="font-weight: bold; color: #2c3e50; margin-bottom: 15px;"></div>
+
+            <button type="button" onclick="closeQrModal()" class="btn-purple" style="width: 100%;">ปิดหน้าต่าง</button>
 
         </div>
 
@@ -885,17 +1386,75 @@
 
         let botanicalOriginsCache = [];
 
-        let speciesList = [], subSpeciesList = [], existingCrosses = [], allPlantsCache = [];
+        let speciesList = [], subSpeciesList = [], existingCrosses = [], allPlantsCache = [], currentLogsCache = [];
 
         let isSignUpMode = false;
 
 
+        const allTabIds = [
+
+            'tab-origins', 'tab-species', 'tab-cross', 'tab-add-plant', 
+
+            'tab-sales', 'tab-record-sale', 'tab-search', 'tab-album', 'tab-view-plants'
+
+        ];
+
+
+        function updateTabWatermark(targetTabId) {
+
+            const urlInput = document.getElementById(`bg_url_${targetTabId}`);
+
+            if (!urlInput) return;
+
+            const url = urlInput.value.trim();
+
+            const cardEl = document.querySelector(`#${targetTabId} .card`);
+
+            
+
+            if (cardEl) {
+
+                if (url) {
+
+                    cardEl.style.setProperty('--tab-watermark-image', `url("${url}")`);
+
+                    localStorage.setItem(`watermark_url_${targetTabId}`, url);
+
+                } else {
+
+                    cardEl.style.removeProperty('--tab-watermark-image');
+
+                    localStorage.removeItem(`watermark_url_${targetTabId}`);
+
+                }
+
+            }
+
+        }
+
+
         window.addEventListener('DOMContentLoaded', async () => {
 
-            // บังคับเคลียร์หน้าจอตอนเริ่มต้นให้แสดงหน้า Login ไว้ก่อนเสมอ
+            allTabIds.forEach(tabId => {
+
+                const savedUrl = localStorage.getItem(`watermark_url_${tabId}`);
+
+                const inputEl = document.getElementById(`bg_url_${tabId}`);
+
+                if (savedUrl && inputEl) {
+
+                    inputEl.value = savedUrl;
+
+                    const cardEl = document.querySelector(`#${tabId} .card`);
+
+                    if (cardEl) cardEl.style.setProperty('--tab-watermark-image', `url("${savedUrl}")`);
+
+                }
+
+            });
+
 
             showLoginScreen();
-
 
             try {
 
@@ -903,28 +1462,130 @@
 
                 if (error) throw error;
 
-                
+                if (session && session.user) { onLoginSuccess(session.user); }
 
-                if (session && session.user) {
+            } catch (err) { console.error("Session check error:", err); showLoginScreen(); }
 
-                    onLoginSuccess(session.user);
+            
 
-                }
+            const todayStr = new Date().toISOString().split('T')[0];
 
-            } catch (err) {
+            const thaiToday = formatDateToThai(todayStr);
 
-                console.error("Session check error:", err);
 
-                showLoginScreen();
+            if(document.getElementById('sale_date_input')) {
+
+                document.getElementById('sale_date_input').value = todayStr;
+
+                document.getElementById('sale_date_display').value = thaiToday;
 
             }
 
+            if(document.getElementById('cross_date')) {
 
-            const dateInput = document.getElementById('sale_date_input');
+                document.getElementById('cross_date').value = todayStr;
 
-            if(dateInput) dateInput.valueAsDate = new Date();
+                document.getElementById('cross_date_display').value = thaiToday;
+
+            }
 
         });
+
+
+        function triggerDatePicker(elementId) {
+
+            const dateInput = document.getElementById(elementId);
+
+            if (dateInput) { try { dateInput.showPicker(); } catch (error) { dateInput.focus(); } }
+
+        }
+
+
+        function formatDateToThai(dateStr) {
+
+            if (!dateStr) return '-';
+
+            const cleanDate = dateStr.split('T')[0];
+
+            const parts = cleanDate.split('-');
+
+            if (parts.length !== 3) return dateStr;
+
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+        }
+
+
+        function syncThaiDateInput(displayId, hiddenId) {
+
+            const displayVal = document.getElementById(displayId).value.trim();
+
+            const hiddenEl = document.getElementById(hiddenId);
+
+            if (!displayVal) { hiddenEl.value = ''; return; }
+
+            const parts = displayVal.split(/[\/\-]/);
+
+            if (parts.length === 3) {
+
+                let day = parts[0].padStart(2, '0');
+
+                let month = parts[1].padStart(2, '0');
+
+                let year = parts[2];
+
+                if (parseInt(year) > 2400) year = String(parseInt(year) - 543);
+
+                hiddenEl.value = `${year}-${month}-${day}`;
+
+            }
+
+        }
+
+
+        function syncDateObjectToDisplay(hiddenId, displayId) {
+
+            const val = document.getElementById(hiddenId).value;
+
+            if (val) { document.getElementById(displayId).value = formatDateToThai(val); }
+
+        }
+
+
+        function previewImage(inputId, previewId) {
+
+            const url = document.getElementById(inputId).value.trim();
+
+            const img = document.getElementById(previewId);
+
+            if (url) { img.src = url; img.style.display = 'block'; } else { img.style.display = 'none'; }
+
+        }
+
+
+        function handleLocalImageSelect(event, inputId, previewId) {
+
+            const file = event.target.files[0];
+
+            if (file) {
+
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+
+                    document.getElementById(inputId).value = e.target.result;
+
+                    previewImage(inputId, previewId);
+
+                    alert('โหลดรูปภาพสำเร็จ!');
+
+                };
+
+                reader.readAsDataURL(file);
+
+            }
+
+        }
 
 
         function showLoginScreen() {
@@ -949,7 +1610,7 @@
 
             if (isSignUpMode) {
 
-                titleEl.innerHTML = `🔐 สมัครสมาชิกใหม่ <span style="font-size: 12px; color: #e67e22;">(Ver.1.1)</span>`;
+                titleEl.innerHTML = `🔐 สมัครสมาชิกใหม่ <span class="version-badge">Ver. 1.36</span>`;
 
                 submitBtn.textContent = 'สมัครสมาชิก';
 
@@ -959,7 +1620,7 @@
 
             } else {
 
-                titleEl.innerHTML = `🔐 เข้าสู่ระบบจัดการสวน <span style="font-size: 12px; color: #e67e22;">(Ver.1.1)</span>`;
+                titleEl.innerHTML = `🔐 เข้าสู่ระบบจัดการสวน <span class="version-badge">Ver. 1.36</span>`;
 
                 submitBtn.textContent = 'เข้าสู่ระบบ';
 
@@ -986,31 +1647,17 @@
 
                 const { data, error } = await supabaseClient.auth.signUp({ email, password });
 
-                if (error) {
+                if (error) { alert('สมัครสมาชิกไม่สำเร็จ: ' + error.message); }
 
-                    alert('สมัครสมาชิกไม่สำเร็จ: ' + error.message);
-
-                } else {
-
-                    alert('สมัครสมาชิกสำเร็จ! กรุณาตรวจสอบอีเมลเพื่อยืนยันตัวตน (หรือเข้าสู่ระบบได้ทันที)');
-
-                    toggleAuthMode();
-
-                }
+                else { alert('สมัครสมาชิกสำเร็จ!'); toggleAuthMode(); }
 
             } else {
 
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-                if (error) {
+                if (error) { alert('เข้าสู่ระบบไม่สำเร็จ: ' + error.message); }
 
-                    alert('เข้าสู่ระบบไม่สำเร็จ: ' + error.message);
-
-                } else if (data && data.user) {
-
-                    onLoginSuccess(data.user);
-
-                }
+                else if (data && data.user) { onLoginSuccess(data.user); }
 
             }
 
@@ -1025,34 +1672,14 @@
 
             document.getElementById('userEmailDisplay').textContent = user.email;
 
-            
-
-            loadOrigins();
-
-            loadSpecies();
-
-            loadSubSpecies();
-
-            loadCrosses();
-
-            loadPlants();
-
-            loadSalesHistory();
+            loadOrigins(); loadSpecies(); loadSubSpecies(); loadCrosses(); loadPlants(); loadSalesHistory();
 
         }
 
 
         async function logout() {
 
-            try {
-
-                await supabaseClient.auth.signOut();
-
-            } catch (err) {
-
-                console.error("SignOut error:", err);
-
-            }
+            try { await supabaseClient.auth.signOut(); } catch (err) { console.error(err); }
 
             location.reload();
 
@@ -1075,10 +1702,19 @@
 
             if (tabId === 'tab-record-sale') loadAvailablePlantsForSale();
 
+            if (tabId === 'tab-album') renderAlbumGrid(allPlantsCache);
+
         }
 
 
-        // ================= 🌍 คลังถิ่นกำเนิด =================
+        function renderPlaceholderRow(colSpan) {
+
+            return `<tr style="background: #fafafa; color: #777;"><td colspan="${colSpan}" style="text-align: center; padding: 15px;"><em>(ยังไม่มีข้อมูล)</em></td></tr>`;
+
+        }
+
+
+        // ================= 🌍 ถิ่นกำเนิด & สายพันธุ์ =================
 
         async function loadOrigins() {
 
@@ -1092,13 +1728,7 @@
 
             tbody.innerHTML = '';
 
-            if (!botanicalOriginsCache.length) {
-
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">ยังไม่มีข้อมูล</td></tr>`;
-
-                return;
-
-            }
+            if (!botanicalOriginsCache.length) { tbody.innerHTML = renderPlaceholderRow(4); return; }
 
             botanicalOriginsCache.forEach(o => {
 
@@ -1106,27 +1736,7 @@
 
                 if (o.native_regions) o.native_regions.forEach(reg => { badges += `<span class="badge">🌍 ${reg}</span>`; });
 
-                tbody.innerHTML += `
-
-                    <tr>
-
-                        <td><strong>${o.genus_name}</strong></td>
-
-                        <td>${badges}</td>
-
-                        <td><small>${o.habitat_description || '-'}</small></td>
-
-                        <td style="text-align: center;">
-
-                            <button type="button" class="btn-warning" style="padding: 4px 8px; font-size: 11px;" onclick="editOrigin(${o.id})">✏️</button>
-
-                            <button type="button" class="btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteOrigin(${o.id})">🗑️</button>
-
-                        </td>
-
-                    </tr>
-
-                `;
+                tbody.innerHTML += `<tr><td><strong>${o.genus_name}</strong></td><td>${badges}</td><td><small>${o.habitat_description || '-'}</small></td><td style="text-align: center;"><div class="action-btns"><button type="button" class="btn-action-edit" onclick="editOrigin(${o.id})">✏️</button><button type="button" class="btn-action-del" onclick="deleteOrigin(${o.id})">🗑️</button></div></td></tr>`;
 
             });
 
@@ -1212,8 +1822,6 @@
         }
 
 
-        // ================= 🌿 สายพันธุ์หลัก =================
-
         async function loadSpecies() {
 
             const { data } = await supabaseClient.from('species').select('*').order('species_name');
@@ -1240,7 +1848,7 @@
 
             tbody.innerHTML = '';
 
-            if (!speciesList.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">ยังไม่มีข้อมูล</td></tr>`; return; }
+            if (!speciesList.length) { tbody.innerHTML = renderPlaceholderRow(5); return; }
 
 
             speciesList.forEach(item => {
@@ -1257,23 +1865,7 @@
                 if (item.native_regions) item.native_regions.forEach(reg => { badges += `<span class="badge">🌍 ${reg}</span>`; });
 
 
-                tbody.innerHTML += `
-
-                    <tr>
-
-                        <td><strong>${item.species_name}</strong></td>
-
-                        <td><span class="badge">${item.prefix_code}</span></td>
-
-                        <td>${badges || '-'}</td>
-
-                        <td><small>${item.habitat_description || '-'}</small></td>
-
-                        <td style="text-align: center;"><button type="button" class="btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteSpecies(${item.id})">🗑️</button></td>
-
-                    </tr>
-
-                `;
+                tbody.innerHTML += `<tr><td><strong>${item.species_name}</strong></td><td><span class="badge">${item.prefix_code}</span></td><td>${badges || '-'}</td><td><small>${item.habitat_description || '-'}</small></td><td style="text-align: center;"><div class="action-btns"><button type="button" class="btn-action-edit" onclick="editSpecies(${item.id})">✏️</button><button type="button" class="btn-action-del" onclick="deleteSpecies(${item.id})">🗑️</button></div></td></tr>`;
 
             });
 
@@ -1301,6 +1893,8 @@
 
             e.preventDefault();
 
+            const id = document.getElementById('species_id_hidden').value;
+
             const species_name = document.getElementById('species_name').value.trim();
 
             const prefix_code = document.getElementById('prefix_code').value.trim().toUpperCase();
@@ -1312,11 +1906,59 @@
             const native_regions = regionsRaw.split(',').map(r => r.trim()).filter(r => r);
 
 
-            const { error } = await supabaseClient.from('species').insert([{ species_name, prefix_code, native_regions, habitat_description }]);
+            if (id) {
 
-            if (error) alert('Error: ' + error.message);
+                await supabaseClient.from('species').update({ species_name, prefix_code, native_regions, habitat_description }).eq('id', id);
 
-            else { alert('เพิ่มสำเร็จ!'); document.getElementById('speciesForm').reset(); loadSpecies(); }
+                alert('แก้ไขสำเร็จ!'); cancelSpeciesEdit();
+
+            } else {
+
+                const { error } = await supabaseClient.from('species').insert([{ species_name, prefix_code, native_regions, habitat_description }]);
+
+                if (error) { alert('Error: ' + error.message); return; }
+
+                alert('เพิ่มสำเร็จ!'); document.getElementById('speciesForm').reset();
+
+            }
+
+            loadSpecies();
+
+        }
+
+
+        function editSpecies(id) {
+
+            const item = speciesList.find(s => s.id === id);
+
+            if (!item) return;
+
+            document.getElementById('species_id_hidden').value = item.id;
+
+            document.getElementById('species_name').value = item.species_name;
+
+            document.getElementById('prefix_code').value = item.prefix_code;
+
+            document.getElementById('species_regions').value = item.native_regions ? item.native_regions.join(', ') : '';
+
+            document.getElementById('species_habitat').value = item.habitat_description || '';
+
+            document.getElementById('btnSaveSpecies').textContent = '💾 บันทึกการแก้ไข';
+
+            document.getElementById('btnCancelSpeciesEdit').style.display = 'inline-block';
+
+        }
+
+
+        function cancelSpeciesEdit() {
+
+            document.getElementById('speciesForm').reset();
+
+            document.getElementById('species_id_hidden').value = '';
+
+            document.getElementById('btnSaveSpecies').textContent = '➕ เพิ่มสายพันธุ์หลัก';
+
+            document.getElementById('btnCancelSpeciesEdit').style.display = 'none';
 
         }
 
@@ -1332,8 +1974,6 @@
         }
 
 
-        // ================= 🌱 สายพันธุ์ย่อย =================
-
         async function loadSubSpecies() {
 
             const { data } = await supabaseClient.from('sub_species').select('*, species(species_name)').order('sub_species_name');
@@ -1346,11 +1986,11 @@
 
             tbody.innerHTML = '';
 
-            if (!subSpeciesList.length) { tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">ยังไม่มีข้อมูล</td></tr>`; return; }
+            if (!subSpeciesList.length) { tbody.innerHTML = renderPlaceholderRow(3); return; }
 
             subSpeciesList.forEach(sub => {
 
-                tbody.innerHTML += `<tr><td>${sub.species ? sub.species.species_name : '-'}</td><td><strong>${sub.sub_species_name}</strong></td><td style="text-align: center;"><button type="button" class="btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteSubSpecies(${sub.id})">🗑️</button></td></tr>`;
+                tbody.innerHTML += `<tr><td>${sub.species ? sub.species.species_name : '-'}</td><td><strong>${sub.sub_species_name}</strong></td><td style="text-align: center;"><div class="action-btns"><button type="button" class="btn-action-edit" onclick="editSubSpecies(${sub.id})">✏️</button><button type="button" class="btn-action-del" onclick="deleteSubSpecies(${sub.id})">🗑️</button></div></td></tr>`;
 
             });
 
@@ -1363,15 +2003,62 @@
 
             e.preventDefault();
 
+            const id = document.getElementById('sub_species_id_hidden').value;
+
             const species_id = document.getElementById('sub_species_parent_id').value;
 
             const sub_species_name = document.getElementById('sub_species_name').value.trim();
 
-            const { error } = await supabaseClient.from('sub_species').insert([{ species_id: parseInt(species_id), sub_species_name }]);
 
-            if (error) alert('Error: ' + error.message);
+            if (id) {
 
-            else { alert('เพิ่มสำเร็จ!'); document.getElementById('sub_species_name').value = ''; loadSubSpecies(); }
+                await supabaseClient.from('sub_species').update({ species_id: parseInt(species_id), sub_species_name }).eq('id', id);
+
+                alert('แก้ไขสำเร็จ!'); cancelSubSpeciesEdit();
+
+            } else {
+
+                const { error } = await supabaseClient.from('sub_species').insert([{ species_id: parseInt(species_id), sub_species_name }]);
+
+                if (error) { alert('Error: ' + error.message); return; }
+
+                alert('เพิ่มสำเร็จ!'); document.getElementById('sub_species_name').value = '';
+
+            }
+
+            loadSubSpecies();
+
+        }
+
+
+        function editSubSpecies(id) {
+
+            const item = subSpeciesList.find(s => s.id === id);
+
+            if (!item) return;
+
+            document.getElementById('sub_species_id_hidden').value = item.id;
+
+            document.getElementById('sub_species_parent_id').value = item.species_id;
+
+            document.getElementById('sub_species_name').value = item.sub_species_name;
+
+            document.getElementById('btnSaveSubSpecies').textContent = '💾 บันทึกการแก้ไข';
+
+            document.getElementById('btnCancelSubSpeciesEdit').style.display = 'inline-block';
+
+        }
+
+
+        function cancelSubSpeciesEdit() {
+
+            document.getElementById('subSpeciesForm').reset();
+
+            document.getElementById('sub_species_id_hidden').value = '';
+
+            document.getElementById('btnSaveSubSpecies').textContent = '➕ เพิ่มสายพันธุ์ย่อย';
+
+            document.getElementById('btnCancelSubSpeciesEdit').style.display = 'none';
 
         }
 
@@ -1459,13 +2146,13 @@
 
             tbody.innerHTML = '';
 
-            if (!existingCrosses.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">ยังไม่มีข้อมูล</td></tr>`; return; }
+            if (!existingCrosses.length) { tbody.innerHTML = renderPlaceholderRow(5); return; }
 
             existingCrosses.forEach(c => {
 
                 if(selectCross) selectCross.innerHTML += `<option value="${c.id}">${c.cross_code}</option>`;
 
-                tbody.innerHTML += `<tr><td><strong>${c.cross_code}</strong></td><td>${c.seed_parent_code}</td><td>${c.pollen_parent_code}</td><td>${c.cross_date || '-'}</td><td style="text-align: center;"><button type="button" class="btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteCross(${c.id})">🗑️</button></td></tr>`;
+                tbody.innerHTML += `<tr><td><strong>${c.cross_code}</strong></td><td>${c.seed_parent_code}</td><td>${c.pollen_parent_code}</td><td>${formatDateToThai(c.cross_date)}</td><td style="text-align: center;"><div class="action-btns"><button type="button" class="btn-action-edit" onclick="editCross(${c.id})">✏️</button><button type="button" class="btn-action-del" onclick="deleteCross(${c.id})">🗑️</button></div></td></tr>`;
 
             });
 
@@ -1512,30 +2199,11 @@
         }
 
 
-        function generateCrossCode() {
-
-            let seed = document.getElementById('seed_parent').value.trim();
-
-            let pollen = document.getElementById('pollen_parent').value.trim();
-
-            if (!seed || !pollen) return;
-
-            if (seed.toLowerCase() === pollen.toLowerCase()) {
-
-                document.getElementById('cross_code').value = `${seed}*${pollen} F1`;
-
-            } else {
-
-                document.getElementById('cross_code').value = `CR-${seed}*${pollen}`;
-
-            }
-
-        }
-
-
         async function saveCrossRecord(e) {
 
             e.preventDefault();
+
+            const id = document.getElementById('cross_id_hidden').value;
 
             const cross_code = document.getElementById('cross_code').value.trim();
 
@@ -1545,11 +2213,67 @@
 
             const cross_date = document.getElementById('cross_date').value;
 
-            const { error } = await supabaseClient.from('crosses').insert([{ cross_code, seed_parent_code, pollen_parent_code, cross_date }]);
 
-            if (error) alert('Error: ' + error.message);
+            if (id) {
 
-            else { alert('บันทึกสำเร็จ!'); document.getElementById('crossForm').reset(); loadCrosses(); }
+                await supabaseClient.from('crosses').update({ cross_code, seed_parent_code, pollen_parent_code, cross_date }).eq('id', id);
+
+                alert('แก้ไขสำเร็จ!'); cancelCrossEdit();
+
+            } else {
+
+                await supabaseClient.from('crosses').insert([{ cross_code, seed_parent_code, pollen_parent_code, cross_date }]);
+
+                alert('บันทึกสำเร็จ!'); document.getElementById('crossForm').reset();
+
+            }
+
+            loadCrosses();
+
+        }
+
+
+        function editCross(id) {
+
+            const item = existingCrosses.find(c => c.id === id);
+
+            if (!item) return;
+
+            document.getElementById('cross_id_hidden').value = item.id;
+
+            document.getElementById('seed_parent').value = item.seed_parent_code;
+
+            document.getElementById('pollen_parent').value = item.pollen_parent_code;
+
+            document.getElementById('cross_code').value = item.cross_code;
+
+            document.getElementById('cross_date').value = item.cross_date || '';
+
+            document.getElementById('cross_date_display').value = formatDateToThai(item.cross_date);
+
+
+            document.getElementById('crossFormTitle').textContent = '✏️ แก้ไขประวัติคู่ผสมพันธุ์';
+
+            document.getElementById('btnSaveCross').textContent = '💾 บันทึกการแก้ไข';
+
+            document.getElementById('btnCancelCrossEdit').style.display = 'inline-block';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        }
+
+
+        function cancelCrossEdit() {
+
+            document.getElementById('crossForm').reset();
+
+            document.getElementById('cross_id_hidden').value = '';
+
+            document.getElementById('crossFormTitle').textContent = '🧬 บันทึกประวัติคู่ผสมพันธุ์';
+
+            document.getElementById('btnSaveCross').textContent = '💾 บันทึกคู่ผสม';
+
+            document.getElementById('btnCancelCrossEdit').style.display = 'none';
 
         }
 
@@ -1600,6 +2324,8 @@
 
             e.preventDefault();
 
+            const id = document.getElementById('plant_id_hidden').value;
+
             const plant_code = document.getElementById('plant_code').value.trim();
 
             const species_id = document.getElementById('species_id').value;
@@ -1612,6 +2338,8 @@
 
             const acquired_from = document.getElementById('plant_acquired_from').value.trim();
 
+            const image_url = document.getElementById('image_url').value.trim();
+
             const status = document.getElementById('status').value;
 
             const birth_date = document.getElementById('birth_date').value;
@@ -1623,7 +2351,7 @@
             const age_days = parseInt(document.getElementById('age_days').value) || 0;
 
 
-            const { error } = await supabaseClient.from('plants').insert([{
+            const payload = {
 
                 plant_code, species_id: parseInt(species_id), 
 
@@ -1631,15 +2359,102 @@
 
                 cross_id: cross_id ? parseInt(cross_id) : null, 
 
-                name, acquired_from, status, birth_date: birth_date || null,
+                name, acquired_from, image_url, status, birth_date: birth_date || null,
 
                 age_years, age_months, age_days
 
-            }]);
+            };
 
-            if (error) alert('Error: ' + error.message);
 
-            else { alert('บันทึกสำเร็จ!'); document.getElementById('plantForm').reset(); loadPlants(); }
+            if (id) {
+
+                await supabaseClient.from('plants').update(payload).eq('id', id);
+
+                alert('แก้ไขสำเร็จ!'); cancelPlantEdit();
+
+            } else {
+
+                const { error } = await supabaseClient.from('plants').insert([payload]);
+
+                if (error) { alert('Error: ' + error.message); return; }
+
+                alert('บันทึกสำเร็จ!'); document.getElementById('plantForm').reset();
+
+                document.getElementById('main_img_preview').style.display = 'none';
+
+            }
+
+            loadPlants();
+
+        }
+
+
+        function editPlant(id) {
+
+            const p = allPlantsCache.find(item => item.id === id);
+
+            if (!p) return;
+
+            document.getElementById('plant_id_hidden').value = p.id;
+
+            document.getElementById('species_id').value = p.species_id || '';
+
+            onSpeciesChange();
+
+            document.getElementById('sub_species_id').value = p.sub_species_id || '';
+
+            document.getElementById('plant_code').value = p.plant_code || '';
+
+            document.getElementById('cross_id').value = p.cross_id || '';
+
+            document.getElementById('plant_name').value = p.name || '';
+
+            document.getElementById('plant_acquired_from').value = p.acquired_from || '';
+
+            document.getElementById('image_url').value = p.image_url || '';
+
+            previewImage('image_url', 'main_img_preview');
+
+            document.getElementById('status').value = p.status || 'ไม้แยกเดี่ยว';
+
+            
+
+            document.getElementById('birth_date').value = p.birth_date || '';
+
+            document.getElementById('birth_date_display').value = formatDateToThai(p.birth_date);
+
+
+            document.getElementById('age_years').value = p.age_years || 0;
+
+            document.getElementById('age_months').value = p.age_months || 0;
+
+            document.getElementById('age_days').value = p.age_days || 0;
+
+
+            document.getElementById('plantFormTitle').textContent = '✏️ แก้ไขข้อมูลต้นไม้';
+
+            document.getElementById('btnSavePlant').textContent = '💾 บันทึกการแก้ไข';
+
+            document.getElementById('btnCancelPlantEdit').style.display = 'inline-block';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        }
+
+
+        function cancelPlantEdit() {
+
+            document.getElementById('plantForm').reset();
+
+            document.getElementById('plant_id_hidden').value = '';
+
+            document.getElementById('main_img_preview').style.display = 'none';
+
+            document.getElementById('plantFormTitle').textContent = '🌱 เพิ่มข้อมูลต้นไม้';
+
+            document.getElementById('btnSavePlant').textContent = '💾 บันทึกข้อมูลต้นไม้';
+
+            document.getElementById('btnCancelPlantEdit').style.display = 'none';
 
         }
 
@@ -1650,7 +2465,7 @@
 
                 .from('plants')
 
-                .select('id, plant_code, name, acquired_from, plant_size, price, status, birth_date, age_years, age_months, age_days, species_id, sub_species_id, cross_id, species(species_name, native_regions), sub_species(sub_species_name), crosses(cross_code)')
+                .select('id, plant_code, name, acquired_from, plant_size, price, status, birth_date, age_years, age_months, age_days, image_url, species_id, sub_species_id, cross_id, species(species_name, native_regions), sub_species(sub_species_name), crosses(cross_code)')
 
                 .order('created_at', { ascending: false });
 
@@ -1663,6 +2478,8 @@
 
             loadSalesTable(allPlantsCache);
 
+            renderAlbumGrid(allPlantsCache);
+
         }
 
 
@@ -1674,17 +2491,23 @@
 
             tbody.innerHTML = '';
 
-            if (!data.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">ยังไม่มีข้อมูล</td></tr>`; return; }
+            if (!data.length) { tbody.innerHTML = renderPlaceholderRow(9); return; }
 
             data.forEach(p => {
+
+                let imgTag = p.image_url ? `<img src="${p.image_url}" class="plant-thumb" onclick="window.open('${p.image_url}', '_blank')">` : `<span style="color:#ccc; font-size:11px;">ไม่มีรูป</span>`;
 
                 tbody.innerHTML += `
 
                     <tr>
 
+                        <td style="text-align:center;">${imgTag}</td>
+
                         <td><strong>${p.plant_code}</strong></td>
 
                         <td>${p.species ? p.species.species_name : '-'}</td>
+
+                        <td>${p.sub_species ? p.sub_species.sub_species_name : '-'}</td>
 
                         <td>${p.name || '-'}</td>
 
@@ -1692,7 +2515,23 @@
 
                         <td>${p.age_years}ปี ${p.age_months}ด.</td>
 
-                        <td style="text-align: center;"><button type="button" class="btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deletePlant(${p.id})">🗑️</button></td>
+                        <td>${formatDateToThai(p.birth_date)}</td>
+
+                        <td style="text-align: center;">
+
+                            <div class="action-btns">
+
+                                <button type="button" class="btn-action-edit" onclick="editPlant(${p.id})" title="แก้ไข">✏️</button>
+
+                                <button type="button" class="btn-action-del" onclick="deletePlant(${p.id})" title="ลบ">🗑️</button>
+
+                                <button type="button" class="btn-action-log" onclick="openLogModal(${p.id}, '${p.plant_code}')" title="ประวัติ">📈 ประวัติ</button>
+
+                                <button type="button" class="btn-action-qr" onclick="openQrModal(${p.id}, '${p.plant_code}')" title="QR Code">🔲 QR</button>
+
+                            </div>
+
+                        </td>
 
                     </tr>
 
@@ -1714,37 +2553,207 @@
         }
 
 
-        // ================= 🏷️ จัดการราคา =================
+        // ================= 📈 ระบบบันทึกพัฒนาการ (Growth Logs) + คำนวณอายุละเอียด =================
 
-        function loadSalesTable(data) {
+        async function openLogModal(plantId, plantCode) {
 
-            const tbody = document.getElementById('salesTableBody');
+            document.getElementById('log_plant_id').value = plantId;
 
-            if(!tbody) return;
+            document.getElementById('modalPlantTitle').textContent = `📈 บันทึกพัฒนาการ: ต้นรหัส ${plantCode}`;
+
+            cancelLogEdit();
+
+            await loadPlantLogs(plantId);
+
+            calculateLogAgeFromPrevious();
+
+            document.getElementById('logModal').style.display = 'block';
+
+        }
+
+
+        function closeLogModal() { document.getElementById('logModal').style.display = 'none'; }
+
+
+        async function calculateLogAgeFromPrevious() {
+
+            const plantId = document.getElementById('log_plant_id').value;
+
+            const logDateStr = document.getElementById('log_date').value;
+
+            if (!plantId || !logDateStr) return;
+
+
+            const plant = allPlantsCache.find(p => p.id == plantId);
+
+            if (!plant) return;
+
+
+            const { data: logs } = await supabaseClient
+
+                .from('plant_logs')
+
+                .select('*')
+
+                .eq('plant_id', plantId)
+
+                .order('log_date', { ascending: false });
+
+
+            let baseYears = plant.age_years || 0;
+
+            let baseMonths = plant.age_months || 0;
+
+            let baseDays = plant.age_days || 0;
+
+            let baseDateStr = plant.birth_date;
+
+
+            if (logs && logs.length > 0) {
+
+                const validLogs = logs.filter(l => l.log_date <= logDateStr);
+
+                if (validLogs.length > 0) {
+
+                    const latestLog = validLogs[0];
+
+                    baseYears = latestLog.age_years || 0;
+
+                    baseMonths = latestLog.age_months || 0;
+
+                    baseDays = latestLog.age_days || 0;
+
+                    baseDateStr = latestLog.log_date;
+
+                }
+
+            }
+
+
+            if (baseDateStr) {
+
+                const startDate = new Date(baseDateStr);
+
+                const targetDate = new Date(logDateStr);
+
+                let diffTime = targetDate - startDate;
+
+                if (diffTime < 0) diffTime = 0;
+
+                let diffDaysTotal = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+
+                let addYears = Math.floor(diffDaysTotal / 365);
+
+                let remDays = diffDaysTotal % 365;
+
+                let addMonths = Math.floor(remDays / 30);
+
+                let addDays = remDays % 30;
+
+
+                let totalDays = (baseDays + addDays);
+
+                let extraMonths = Math.floor(totalDays / 30);
+
+                let finalDays = totalDays % 30;
+
+
+                let totalMonths = (baseMonths + addMonths + extraMonths);
+
+                let extraYears = Math.floor(totalMonths / 12);
+
+                let finalMonths = totalMonths % 12;
+
+
+                let finalYears = baseYears + addYears + extraYears;
+
+
+                document.getElementById('log_age_years').value = finalYears;
+
+                document.getElementById('log_age_months').value = finalMonths;
+
+                document.getElementById('log_age_days').value = finalDays;
+
+            }
+
+        }
+
+
+        async function loadPlantLogs(plantId) {
+
+            const tbody = document.getElementById('modalLogTableBody');
+
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">กำลังโหลดประวัติ...</td></tr>';
+
+            
+
+            const { data, error } = await supabaseClient
+
+                .from('plant_logs')
+
+                .select('*')
+
+                .eq('plant_id', plantId)
+
+                .order('log_date', { ascending: false });
+
+
+            if (error) {
+
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">ยังไม่ได้สร้างตาราง plant_logs ใน Supabase</td></tr>`;
+
+                return;
+
+            }
+
+
+            if (!data || !data.length) {
+
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#777;">ยังไม่มีประวัติพัฒนาการ</td></tr>`;
+
+                return;
+
+            }
+
+
+            currentLogsCache = data;
 
             tbody.innerHTML = '';
 
-            if (!data.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">ยังไม่มีข้อมูล</td></tr>`; return; }
+            data.forEach(log => {
 
-            data.forEach(p => {
+                let imgTag = log.image_url ? `<img src="${log.image_url}" class="plant-thumb" onclick="window.open('${log.image_url}', '_blank')">` : `-`;
+
+                let ageDisplay = `${log.age_years || 0}ปี ${log.age_months || 0}ด. ${log.age_days || 0}ว.`;
 
                 tbody.innerHTML += `
 
                     <tr>
 
-                        <td><strong>${p.plant_code}</strong></td>
+                        <td style="text-align:center;">${imgTag}</td>
 
-                        <td>${p.species ? p.species.species_name : ''}</td>
+                        <td>${formatDateToThai(log.log_date)}</td>
 
-                        <td>${p.name || '-'}</td>
+                        <td><strong>${log.age_description}</strong></td>
 
-                        <td><span class="badge">${p.status}</span></td>
+                        <td>${ageDisplay}</td>
 
-                        <td><input type="text" id="size_${p.id}" value="${p.plant_size || ''}" placeholder="ขนาด"></td>
+                        <td>${log.plant_size || '-'}</td>
 
-                        <td><input type="number" id="price_${p.id}" value="${p.price || 0}" min="0"></td>
+                        <td><small>${log.notes || '-'}</small></td>
 
-                        <td style="text-align: center;"><button type="button" class="btn-success" style="padding: 4px 8px; font-size: 11px;" onclick="savePlantPrice(${p.id})">💾</button></td>
+                        <td style="text-align: center;">
+
+                            <div class="action-btns">
+
+                                <button type="button" class="btn-action-edit" onclick="editPlantLog(${log.id})">✏️</button>
+
+                                <button type="button" class="btn-action-del" onclick="deletePlantLog(${log.id}, ${plantId})">🗑️</button>
+
+                            </div>
+
+                        </td>
 
                     </tr>
 
@@ -1755,11 +2764,225 @@
         }
 
 
+        async function savePlantLog(e) {
+
+            e.preventDefault();
+
+            const logId = document.getElementById('log_id_hidden').value;
+
+            const plant_id = document.getElementById('log_plant_id').value;
+
+            const age_description = document.getElementById('log_age_desc').value.trim();
+
+            
+
+            const age_years = parseInt(document.getElementById('log_age_years').value) || 0;
+
+            const age_months = parseInt(document.getElementById('log_age_months').value) || 0;
+
+            const age_days = parseInt(document.getElementById('log_age_days').value) || 0;
+
+
+            const sizeVal = document.getElementById('log_size_val').value.trim();
+
+            const sizeUnit = document.getElementById('log_size_unit').value;
+
+            const plant_size = sizeVal ? `${sizeVal} ${sizeUnit}` : '';
+
+
+            const log_date = document.getElementById('log_date').value;
+
+            const image_url = document.getElementById('log_image_url').value.trim();
+
+            const notes = document.getElementById('log_notes').value.trim();
+
+
+            const payload = { plant_id: parseInt(plant_id), age_description, age_years, age_months, age_days, plant_size, log_date: log_date || null, image_url, notes };
+
+
+            if (logId) {
+
+                await supabaseClient.from('plant_logs').update(payload).eq('id', logId);
+
+                alert('แก้ไขประวัติพัฒนาการสำเร็จ!');
+
+            } else {
+
+                await supabaseClient.from('plant_logs').insert([payload]);
+
+                alert('บันทึกพัฒนาการสำเร็จ!');
+
+            }
+
+
+            cancelLogEdit();
+
+            loadPlantLogs(plant_id);
+
+        }
+
+
+        function editPlantLog(logId) {
+
+            const log = currentLogsCache.find(l => l.id === logId);
+
+            if (!log) return;
+
+            document.getElementById('log_id_hidden').value = log.id;
+
+            document.getElementById('log_age_desc').value = log.age_description || '';
+
+            
+
+            document.getElementById('log_age_years').value = log.age_years || 0;
+
+            document.getElementById('log_age_months').value = log.age_months || 0;
+
+            document.getElementById('log_age_days').value = log.age_days || 0;
+
+
+            if (log.plant_size) {
+
+                const parts = log.plant_size.trim().split(' ');
+
+                document.getElementById('log_size_val').value = parts[0] || '';
+
+                if (parts[1]) document.getElementById('log_size_unit').value = parts[1];
+
+            }
+
+
+            document.getElementById('log_date').value = log.log_date || '';
+
+            document.getElementById('log_date_display').value = formatDateToThai(log.log_date);
+
+            document.getElementById('log_image_url').value = log.image_url || '';
+
+            previewImage('log_image_url', 'log_img_preview');
+
+            document.getElementById('log_notes').value = log.notes || '';
+
+
+            document.getElementById('btnSaveLog').textContent = '💾 บันทึกการแก้ไขพัฒนาการ';
+
+            document.getElementById('btnCancelLogEdit').style.display = 'inline-block';
+
+        }
+
+
+        function cancelLogEdit() {
+
+            document.getElementById('plantLogForm').reset();
+
+            document.getElementById('log_id_hidden').value = '';
+
+            document.getElementById('log_img_preview').style.display = 'none';
+
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            document.getElementById('log_date').value = todayStr;
+
+            document.getElementById('log_date_display').value = formatDateToThai(todayStr);
+
+            calculateLogAgeFromPrevious();
+
+
+            document.getElementById('btnSaveLog').textContent = '➕ เพิ่มบันทึกพัฒนาการ';
+
+            document.getElementById('btnCancelLogEdit').style.display = 'none';
+
+        }
+
+
+        async function deletePlantLog(logId, plantId) {
+
+            if (!confirm('ยืนยันการลบประวัตินี้?')) return;
+
+            await supabaseClient.from('plant_logs').delete().eq('id', logId);
+
+            loadPlantLogs(plantId);
+
+        }
+
+
+        // ================= 🔲 ระบบ QR Code =================
+
+        function openQrModal(plantId, plantCode) {
+
+            document.getElementById('qrModalTitle').textContent = `🔲 QR Code: ${plantCode}`;
+
+            document.getElementById('qrPlantInfo').textContent = `รหัสต้นไม้: ${plantCode}`;
+
+            
+
+            const qrContainer = document.getElementById('qrcode');
+
+            qrContainer.innerHTML = '';
+
+            const plantDataUrl = `รหัสต้นไม้: ${plantCode} (ID: ${plantId}) - ระบบจัดการสวนต้นไม้`;
+
+            
+
+            new QRCode(qrContainer, { text: plantDataUrl, width: 180, height: 180 });
+
+            document.getElementById('qrModal').style.display = 'block';
+
+        }
+
+
+        function closeQrModal() { document.getElementById('qrModal').style.display = 'none'; }
+
+
+        // ================= 🏷️ จัดการราคา & การขาย & ค้นหา =================
+
+        function loadSalesTable(data) {
+
+            const tbody = document.getElementById('salesTableBody');
+
+            if(!tbody) return;
+
+            tbody.innerHTML = '';
+
+            if (!data.length) { tbody.innerHTML = renderPlaceholderRow(8); return; }
+
+            
+
+            data.forEach(p => {
+
+                let imgTag = p.image_url ? `<img src="${p.image_url}" class="plant-thumb" onclick="window.open('${p.image_url}', '_blank')">` : `<span style="color:#ccc; font-size:11px;">ไม่มีรูป</span>`;
+
+                let sizeVal = '';
+
+                let sizeUnit = 'ซม.';
+
+                if (p.plant_size) {
+
+                    const parts = p.plant_size.trim().split(' ');
+
+                    sizeVal = parts[0] || '';
+
+                    if (parts[1]) sizeUnit = parts[1];
+
+                }
+
+
+                tbody.innerHTML += `<tr><td style="text-align:center;">${imgTag}</td><td><strong>${p.plant_code}</strong></td><td>${p.species ? p.species.species_name : ''}</td><td>${p.name || '-'}</td><td><span class="badge">${p.status}</span></td><td><div style="display: flex; gap: 5px;"><input type="number" id="size_val_${p.id}" value="${sizeVal}" placeholder="ระบุตัวเลข" step="any" min="0" style="flex: 2;"><select id="size_unit_${p.id}" style="flex: 1; padding: 6px;"><option value="ซม." ${sizeUnit === 'ซม.' || sizeUnit === 'cm' ? 'selected' : ''}>ซม.</option><option value="นิ้ว" ${sizeUnit === 'นิ้ว' || sizeUnit === 'inch' ? 'selected' : ''}>นิ้ว</option></select></div></td><td><input type="number" id="price_${p.id}" value="${p.price || 0}" min="0"></td><td style="text-align: center;"><div class="action-btns"><button type="button" class="btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="savePlantPrice(${p.id})">💾</button><button type="button" class="btn-action-del" onclick="deletePlant(${p.id})">🗑️</button></div></td></tr>`;
+
+            });
+
+        }
+
+
         async function savePlantPrice(id) {
+
+            const val = document.getElementById(`size_val_${id}`).value.trim();
+
+            const unit = document.getElementById(`size_unit_${id}`).value;
+
+            const plant_size = val ? `${val} ${unit}` : '';
 
             const price = parseInt(document.getElementById(`price_${id}`).value) || 0;
 
-            const plant_size = document.getElementById(`size_${id}`).value.trim();
 
             const { error } = await supabaseClient.from('plants').update({ price, plant_size }).eq('id', id);
 
@@ -1769,8 +2992,6 @@
 
         }
 
-
-        // ================= 💰 บันทึกการขาย =================
 
         async function loadAvailablePlantsForSale() {
 
@@ -1790,23 +3011,7 @@
 
                 const spName = p.species ? p.species.species_name : '';
 
-                tbody.innerHTML += `
-
-                    <tr>
-
-                        <td style="text-align: center;"><input type="checkbox" name="salePlantCheckbox" value="${p.id}" data-code="${p.plant_code}" data-details="${spName} ${p.name || ''}" data-price="${p.price || 0}"></td>
-
-                        <td><strong>${p.plant_code}</strong></td>
-
-                        <td>${spName}</td>
-
-                        <td>${p.name || '-'}</td>
-
-                        <td>${p.price || 0}</td>
-
-                    </tr>
-
-                `;
+                tbody.innerHTML += `<tr><td style="text-align: center;"><input type="checkbox" name="salePlantCheckbox" value="${p.id}" data-code="${p.plant_code}" data-details="${spName} ${p.name || ''}" data-price="${p.price || 0}"></td><td><strong>${p.plant_code}</strong></td><td>${spName}</td><td>${p.name || '-'}</td><td>${p.price || 0}</td></tr>`;
 
             });
 
@@ -1868,7 +3073,12 @@
 
             document.getElementById('recordSaleForm').reset();
 
-            document.getElementById('sale_date_input').valueAsDate = new Date();
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            document.getElementById('sale_date_input').value = todayStr;
+
+            document.getElementById('sale_date_display').value = formatDateToThai(todayStr);
+
 
             loadAvailablePlantsForSale(); loadSalesHistory(); loadPlants();
 
@@ -1883,7 +3093,7 @@
 
             const { data: sales } = await supabaseClient.from('sales_records').select('*, sale_items(*)').order('sale_date', { ascending: false });
 
-            if (!sales || !sales.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">ยังไม่มีประวัติการขาย</td></tr>`; return; }
+            if (!sales || !sales.length) { tbody.innerHTML = renderPlaceholderRow(6); return; }
 
             tbody.innerHTML = '';
 
@@ -1895,7 +3105,7 @@
 
                 itemsHtml += '</ul>';
 
-                tbody.innerHTML += `<tr><td>#${s.id}</td><td>${s.sale_date}</td><td>${s.buyer_name}</td><td>${itemsHtml}</td><td style="color:#27ae60; font-weight:bold;">฿${s.total_price.toLocaleString()}</td><td style="text-align: center;"><button type="button" class="btn-danger" style="padding:3px 6px; font-size:11px;" onclick="deleteSaleRecord(${s.id})">ลบ</button></td></tr>`;
+                tbody.innerHTML += `<tr><td>#${s.id}</td><td>${formatDateToThai(s.sale_date)}</td><td>${s.buyer_name}</td><td>${itemsHtml}</td><td style="color:#27ae60; font-weight:bold;">฿${s.total_price.toLocaleString()}</td><td style="text-align: center;"><div class="action-btns"><button type="button" class="btn-action-del" onclick="deleteSaleRecord(${s.id})">🗑️</button></div></td></tr>`;
 
             });
 
@@ -1904,7 +3114,7 @@
 
         async function deleteSaleRecord(saleId) {
 
-            if (!confirm('ยืนยันลบ?')) return;
+            if (!confirm('ยืนยันการลบ?')) return;
 
             const { data: items } = await supabaseClient.from('sale_items').select('plant_id').eq('sale_id', saleId);
 
@@ -1917,7 +3127,35 @@
         }
 
 
-        // ================= 🔍 ค้นหา & รายการ =================
+        function renderAlbumGrid(data) {
+
+            const container = document.getElementById('albumGridContainer');
+
+            if(!container) return;
+
+            container.innerHTML = '';
+
+            const withImages = data.filter(p => p.image_url && p.image_url.trim() !== '');
+
+            if (!withImages.length) { container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:#777; padding: 30px;">ยังไม่มีรูปภาพต้นไม้ในระบบ</div>`; return; }
+
+            withImages.forEach(p => {
+
+                container.innerHTML += `<div class="album-card"><img src="${p.image_url}" alt="${p.plant_code}" onclick="window.open('${p.image_url}', '_blank')"><div class="album-card-body"><strong>${p.plant_code}</strong><br><small style="color: #666;">${p.species ? p.species.species_name : ''} ${p.name || ''}</small><br><span class="badge" style="margin-top: 5px;">${p.status}</span></div></div>`;
+
+            });
+
+        }
+
+
+        function filterAlbumGrid() {
+
+            const input = document.getElementById('searchAlbumInput').value.toLowerCase();
+
+            document.querySelectorAll('.album-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(input) ? '' : 'none'; });
+
+        }
+
 
         function renderViewPlantTable(data) {
 
@@ -1927,37 +3165,17 @@
 
             tbody.innerHTML = '';
 
-            if (!data.length) { tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">ยังไม่มีข้อมูล</td></tr>`; return; }
+            if (!data.length) { tbody.innerHTML = renderPlaceholderRow(12); return; }
 
             data.forEach(p => {
+
+                let imgTag = p.image_url ? `<img src="${p.image_url}" class="plant-thumb" onclick="window.open('${p.image_url}', '_blank')">` : `<span style="color:#ccc; font-size:11px;">ไม่มีรูป</span>`;
 
                 let badges = '';
 
                 if (p.species && p.species.native_regions) p.species.native_regions.forEach(reg => { badges += `<span class="badge">🌍 ${reg}</span>`; });
 
-                tbody.innerHTML += `
-
-                    <tr>
-
-                        <td><strong>${p.plant_code}</strong></td>
-
-                        <td>${p.species ? p.species.species_name : '-'}</td>
-
-                        <td>${badges || '-'}</td>
-
-                        <td>${p.crosses ? p.crosses.cross_code : '-'}</td>
-
-                        <td>${p.name || '-'}</td>
-
-                        <td style="color:#27ae60; font-weight:bold;">฿${p.price || 0}</td>
-
-                        <td><span class="badge">${p.status}</span></td>
-
-                        <td>${p.age_years}ปี ${p.age_months}ด.</td>
-
-                    </tr>
-
-                `;
+                tbody.innerHTML += `<tr><td style="text-align:center;">${imgTag}</td><td><strong>${p.plant_code}</strong></td><td>${p.species ? p.species.species_name : '-'}</td><td>${p.sub_species ? p.sub_species.sub_species_name : '-'}</td><td>${badges || '-'}</td><td>${p.crosses ? p.crosses.cross_code : '-'}</td><td>${p.name || '-'}</td><td>${p.plant_size || '-'}</td><td style="color:#27ae60; font-weight:bold;">฿${p.price || 0}</td><td><span class="badge">${p.status}</span></td><td>${p.age_years}ปี ${p.age_months}ด.</td><td>${formatDateToThai(p.birth_date)}</td></tr>`;
 
             });
 
@@ -1994,15 +3212,17 @@
 
             tbody.innerHTML = '';
 
-            if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">ไม่พบข้อมูล</td></tr>`; return; }
+            if (!filtered.length) { tbody.innerHTML = renderPlaceholderRow(9); return; }
 
             filtered.forEach(p => {
+
+                let imgTag = p.image_url ? `<img src="${p.image_url}" class="plant-thumb" onclick="window.open('${p.image_url}', '_blank')">` : `<span style="color:#ccc; font-size:11px;">ไม่มีรูป</span>`;
 
                 let badges = '';
 
                 if (p.species && p.species.native_regions) p.species.native_regions.forEach(reg => { badges += `<span class="badge">🌍 ${reg}</span>`; });
 
-                tbody.innerHTML += `<tr><td><strong>${p.plant_code}</strong></td><td>${p.species ? p.species.species_name : '-'}</td><td>${badges || '-'}</td><td>${p.name || '-'}</td><td>฿${p.price || 0}</td><td><span class="badge">${p.status}</span></td></tr>`;
+                tbody.innerHTML += `<tr><td style="text-align:center;">${imgTag}</td><td><strong>${p.plant_code}</strong></td><td>${p.species ? p.species.species_name : '-'}</td><td>${p.sub_species ? p.sub_species.sub_species_name : '-'}</td><td>${badges || '-'}</td><td>${p.name || '-'}</td><td>${p.plant_size || '-'}</td><td>฿${p.price || 0}</td><td><span class="badge">${p.status}</span></td></tr>`;
 
             });
 
